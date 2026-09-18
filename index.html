@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vyapar AI - Apna Business Badhao</title>
+<link rel="manifest" href="/manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow">
+  <div class="bg-[#5B5CFF] text-white p-5">
+    <h1 class="text-xl font-bold">Vyapar AI</h1>
+    <p class="text-sm opacity-90">Khatabook + Vyapar + AI</p>
+  </div>
+  
+  <div id="setupBox" class="p-4 bg-yellow-50 border m-4 rounded">
+    <h3 class="font-bold">🔑 Supabase Connect (Pehli baar)</h3>
+    <p class="text-xs text-gray-600 mb-2">Vercel env vars ka error hai to yahan direct daal do - safe hai, sirf tumhare browser me save hoga</p>
+    <input id="supaUrl" placeholder="https://xxxx.supabase.co" class="w-full border p-2 rounded mb-2 text-sm">
+    <input id="supaKey" placeholder="anon key eyJ..." class="w-full border p-2 rounded mb-2 text-sm">
+    <button onclick="saveSupa()" class="w-full bg-[#5B5CFF] text-white p-2 rounded">Connect & Save</button>
+    <p class="text-[10px] mt-2 text-gray-500">anon key hi daale, service_role kabhi nahi. RLS se protected hai.</p>
+  </div>
+
+  <div class="p-4">
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="bg-green-50 p-3 rounded"><p class="text-xs">Aaj ka Profit</p><p class="font-bold text-green-700" id="profit">₹0</p></div>
+      <div class="bg-blue-50 p-3 rounded"><p class="text-xs">Udhar Baki</p><p class="font-bold text-blue-700" id="due">₹0</p></div>
+    </div>
+    <input id="custName" placeholder="Customer ka naam" class="w-full border p-3 rounded mb-2">
+    <input id="custPhone" placeholder="Phone (optional)" class="w-full border p-3 rounded mb-2">
+    <input id="custAmount" type="number" placeholder="Amount ₹" class="w-full border p-3 rounded mb-2">
+    <button onclick="addCustomer()" class="w-full bg-[#5B5CFF] text-white p-3 rounded font-bold">+ Customer Add Karo</button>
+    <button onclick="eraseCustomers()" class="w-full mt-2 bg-red-50 text-red-600 p-2 rounded text-sm">🗑️ Sab Customers Delete (Test ke liye)</button>
+    <div id="list" class="mt-4"></div>
+  </div>
+</div>
+
+<script>
+let supa=null;
+function loadSupa(){
+  const url=localStorage.getItem('SUPA_URL')||'';
+  const key=localStorage.getItem('SUPA_KEY')||'';
+  document.getElementById('supaUrl').value=url;
+  document.getElementById('supaKey').value=key;
+  if(url&&key){
+    supa=window.supabase.createClient(url,key);
+    document.getElementById('setupBox').classList.add('hidden');
+    loadCustomers();
+  }
+}
+function saveSupa(){
+  const url=document.getElementById('supaUrl').value.trim();
+  const key=document.getElementById('supaKey').value.trim();
+  if(!url||!key){alert('URL aur Key dono bharo');return;}
+  localStorage.setItem('SUPA_URL',url);
+  localStorage.setItem('SUPA_KEY',key);
+  location.reload();
+}
+async function loadCustomers(){
+  if(!supa) return;
+  const {data,error}=await supa.from('customers').select('*').order('created_at',{ascending:false}).limit(50);
+  if(error){document.getElementById('list').innerHTML='<p class=text-red-500 text-sm>Error: '+error.message+'<br>SQL fix chalao: supabase/schema.sql</p>';return;}
+  let html=''; let totalDue=0;
+  (data||[]).forEach(c=>{
+    totalDue+=(c.balance_due||0);
+    html+=`<div class='border p-3 rounded mb-2 flex justify-between'><div><b>${c.name}</b><br><span class='text-xs'>${c.phone||''}</span></div><div class='text-right'><span class='font-bold'>₹${c.balance_due||0}</span></div></div>`;
+  });
+  document.getElementById('list').innerHTML=html||'<p class=text-gray-400 text-sm>Abhi koi customer nahi</p>';
+  document.getElementById('due').innerText='₹'+totalDue;
+}
+async function addCustomer(){
+  const name=document.getElementById('custName').value.trim();
+  const phone=document.getElementById('custPhone').value.trim();
+  const amount=parseFloat(document.getElementById('custAmount').value)||0;
+  if(!name){alert('Naam bharo');return;}
+  if(!supa){alert('Pehle Supabase connect karo');return;}
+  const {error}=await supa.from('customers').insert([{name,phone,balance_due:amount,total_sale:amount}]);
+  if(error){alert('Error: '+error.message);}else{alert('Added ✅');document.getElementById('custName').value='';document.getElementById('custAmount').value='';loadCustomers();}
+}
+async function eraseCustomers(){
+  if(!confirm('Sab customers delete karne hain? Test ke baad hi karo')) return;
+  if(!supa){localStorage.clear();location.reload();return;}
+  const {error}=await supa.from('customers').delete().neq('id','00000000-0000-0000-0000-000000000000');
+  if(error) alert(error.message); else {alert('Sab delete ho gaye ✅'); loadCustomers();}
+}
+loadSupa();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+</script>
+</body>
+</html>
