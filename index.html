@@ -1,92 +1,76 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vyapar AI - Apna Business Badhao</title>
-<link rel="manifest" href="/manifest.json">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171717">
+  <meta name="description" content="Vyapar AI se customers aur udhaar ka simple hisaab rakhein.">
+  <title>Vyapar AI — Business Ledger</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#171717;background:#f5f5f4}
+    *{box-sizing:border-box} body{margin:0} button,input{font:inherit} button{cursor:pointer}
+    .shell{max-width:760px;min-height:100vh;margin:auto;background:#fff;box-shadow:0 0 40px #0000000d}
+    header{background:#171717;color:#fff;padding:24px 20px 28px} header .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
+    .brand{font-size:22px;font-weight:800;letter-spacing:-.03em}.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#a3a3a3;margin:0 0 6px;font-weight:700}
+    .status{font-size:12px;color:#d4d4d4;background:#262626;border:1px solid #404040;border-radius:999px;padding:7px 10px;white-space:nowrap}
+    header h1{font-size:30px;line-height:1.12;letter-spacing:-.04em;margin:28px 0 8px;max-width:460px} header p{margin:0;color:#d4d4d4;font-size:14px}
+    main{padding:20px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.stat{border:1px solid #e7e5e4;border-radius:14px;padding:14px;background:#fafaf9}.stat p{font-size:12px;color:#737373;margin:0 0 8px}.stat strong{font-size:20px;letter-spacing:-.03em}.stat.green strong{color:#15803d}.stat.orange strong{color:#c2410c}
+    .card{border:1px solid #e7e5e4;border-radius:16px;padding:18px;margin-bottom:20px}.card h2{font-size:17px;margin:0 0 4px}.muted{color:#737373;font-size:13px;margin:0 0 16px}
+    .form{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px;align-items:end}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;font-weight:700;color:#525252}.field input{width:100%;border:1px solid #d6d3d1;border-radius:10px;padding:11px 12px;outline:none;background:#fff}.field input:focus{border-color:#171717;box-shadow:0 0 0 3px #17171712}.primary{border:0;background:#171717;color:#fff;border-radius:10px;padding:11px 15px;font-weight:700;white-space:nowrap}.primary:hover{background:#404040}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.toolbar h2{margin:0}.search{border:1px solid #d6d3d1;border-radius:10px;padding:9px 11px;width:180px;outline:none}.customer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid #f0eeec}.customer:first-child{border-top:0}.customer-info{min-width:0}.customer-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.customer-meta{font-size:12px;color:#737373;margin-top:4px}.customer-end{text-align:right;display:flex;align-items:center;gap:10px}.balance{font-weight:800;color:#c2410c;white-space:nowrap}.delete{border:1px solid #e7e5e4;background:#fff;color:#737373;border-radius:8px;padding:6px 8px;font-size:12px}.delete:hover{color:#b91c1c;border-color:#fecaca}.empty{text-align:center;padding:28px 12px;color:#737373;font-size:14px}.notice{font-size:12px;color:#737373;background:#fafaf9;border-radius:10px;padding:10px 12px;margin-top:14px}.danger{border:0;background:transparent;color:#b91c1c;font-size:12px;padding:0}.actions{display:flex;justify-content:flex-end;margin-top:12px}.error{color:#b91c1c;font-size:13px;margin:10px 0 0;min-height:18px}
+    @media(max-width:640px){header{padding:20px 16px 24px}main{padding:16px}.stats{gap:8px}.stat{padding:12px 10px}.stat strong{font-size:17px}.form{grid-template-columns:1fr 1fr}.form .field:first-child{grid-column:1/-1}.form button{grid-column:1/-1}.toolbar{align-items:stretch;flex-direction:column}.search{width:100%}.customer-end{gap:6px}.balance{font-size:14px}}
+  </style>
 </head>
-<body class="bg-gray-50">
-<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow">
-  <div class="bg-[#5B5CFF] text-white p-5">
-    <h1 class="text-xl font-bold">Vyapar AI</h1>
-    <p class="text-sm opacity-90">Khatabook + Vyapar + AI</p>
+<body>
+  <div class="shell">
+    <header>
+      <div class="top"><div><p class="eyebrow">Simple business ledger</p><div class="brand">Vyapar AI</div></div><div class="status" id="status">Local mode</div></div>
+      <h1>Apne customers ka hisaab, ek jagah.</h1><p>Udhaar track karein, total dekhein aur business ko organized rakhein.</p>
+    </header>
+    <main>
+      <section class="stats" aria-label="Business summary">
+        <div class="stat green"><p>Aaj ka collection</p><strong id="collection">₹0</strong></div>
+        <div class="stat orange"><p>Total udhaar</p><strong id="due">₹0</strong></div>
+        <div class="stat"><p>Customers</p><strong id="count">0</strong></div>
+      </section>
+      <section class="card">
+        <h2>Customer add karein</h2><p class="muted">Naam aur udhaar amount bhar kar naya record banayein.</p>
+        <form class="form" id="customerForm">
+          <div class="field"><label for="custName">Customer ka naam</label><input id="custName" required maxlength="80" autocomplete="name" placeholder="Jaise: Ravi Kumar"></div>
+          <div class="field"><label for="custPhone">Phone (optional)</label><input id="custPhone" maxlength="15" inputmode="tel" autocomplete="tel" placeholder="9876543210"></div>
+          <div class="field"><label for="custAmount">Udhaar amount</label><input id="custAmount" required min="0" step="0.01" type="number" inputmode="decimal" placeholder="₹ 0"></div>
+          <button class="primary" type="submit">Customer save karein</button>
+        </form>
+        <p class="error" id="error" role="alert"></p>
+        <div class="notice">Data is browser mein locally save hota hai. Supabase connect kiye bina demo safely use kar sakte hain.</div>
+      </section>
+      <section class="card">
+        <div class="toolbar"><div><h2>Customer list</h2><p class="muted" style="margin:4px 0 0">Recent records aur unka balance.</p></div><input class="search" id="search" type="search" placeholder="Search customer" aria-label="Search customer"></div>
+        <div id="list" aria-live="polite"></div>
+        <div class="actions"><button class="danger" id="clearAll" type="button">Sab records delete karein</button></div>
+      </section>
+    </main>
   </div>
-  
-  <div id="setupBox" class="p-4 bg-yellow-50 border m-4 rounded">
-    <h3 class="font-bold">🔑 Supabase Connect (Pehli baar)</h3>
-    <p class="text-xs text-gray-600 mb-2">Vercel env vars ka error hai to yahan direct daal do - safe hai, sirf tumhare browser me save hoga</p>
-    <input id="supaUrl" placeholder="https://xxxx.supabase.co" class="w-full border p-2 rounded mb-2 text-sm">
-    <input id="supaKey" placeholder="anon key eyJ..." class="w-full border p-2 rounded mb-2 text-sm">
-    <button onclick="saveSupa()" class="w-full bg-[#5B5CFF] text-white p-2 rounded">Connect & Save</button>
-    <p class="text-[10px] mt-2 text-gray-500">anon key hi daale, service_role kabhi nahi. RLS se protected hai.</p>
-  </div>
-
-  <div class="p-4">
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="bg-green-50 p-3 rounded"><p class="text-xs">Aaj ka Profit</p><p class="font-bold text-green-700" id="profit">₹0</p></div>
-      <div class="bg-blue-50 p-3 rounded"><p class="text-xs">Udhar Baki</p><p class="font-bold text-blue-700" id="due">₹0</p></div>
-    </div>
-    <input id="custName" placeholder="Customer ka naam" class="w-full border p-3 rounded mb-2">
-    <input id="custPhone" placeholder="Phone (optional)" class="w-full border p-3 rounded mb-2">
-    <input id="custAmount" type="number" placeholder="Amount ₹" class="w-full border p-3 rounded mb-2">
-    <button onclick="addCustomer()" class="w-full bg-[#5B5CFF] text-white p-3 rounded font-bold">+ Customer Add Karo</button>
-    <button onclick="eraseCustomers()" class="w-full mt-2 bg-red-50 text-red-600 p-2 rounded text-sm">🗑️ Sab Customers Delete (Test ke liye)</button>
-    <div id="list" class="mt-4"></div>
-  </div>
-</div>
-
 <script>
-let supa=null;
-function loadSupa(){
-  const url=localStorage.getItem('SUPA_URL')||'';
-  const key=localStorage.getItem('SUPA_KEY')||'';
-  document.getElementById('supaUrl').value=url;
-  document.getElementById('supaKey').value=key;
-  if(url&&key){
-    supa=window.supabase.createClient(url,key);
-    document.getElementById('setupBox').classList.add('hidden');
-    loadCustomers();
+  const STORAGE_KEY = 'vyapar-ai-customers-v1';
+  let customers = readCustomers();
+  const money = value => new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(value || 0);
+  const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+  function readCustomers(){ try { const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); return Array.isArray(saved)?saved.filter(item=>item && item.id && item.name):[]; } catch { return []; } }
+  function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(customers)); }
+  function render(){
+    const query=document.getElementById('search').value.trim().toLowerCase();
+    const visible=customers.filter(c => `${c.name} ${c.phone||''}`.toLowerCase().includes(query));
+    const due=customers.reduce((sum,c)=>sum+Number(c.amount||0),0);
+    document.getElementById('due').textContent=money(due); document.getElementById('count').textContent=customers.length; document.getElementById('collection').textContent=money(0);
+    document.getElementById('list').innerHTML=visible.length ? visible.map(c=>`<article class="customer"><div class="customer-info"><div class="customer-name">${escapeHtml(c.name)}</div><div class="customer-meta">${escapeHtml(c.phone || 'Phone add nahi kiya')}</div></div><div class="customer-end"><span class="balance">${money(c.amount)}</span><button class="delete" type="button" data-delete="${escapeHtml(c.id)}" aria-label="Delete ${escapeHtml(c.name)}">Delete</button></div></article>`).join('') : `<div class="empty">${query ? 'Is search ke liye koi customer nahi mila.' : 'Abhi koi customer nahi hai. Pehla record add karein.'}</div>`;
   }
-}
-function saveSupa(){
-  const url=document.getElementById('supaUrl').value.trim();
-  const key=document.getElementById('supaKey').value.trim();
-  if(!url||!key){alert('URL aur Key dono bharo');return;}
-  localStorage.setItem('SUPA_URL',url);
-  localStorage.setItem('SUPA_KEY',key);
-  location.reload();
-}
-async function loadCustomers(){
-  if(!supa) return;
-  const {data,error}=await supa.from('customers').select('*').order('created_at',{ascending:false}).limit(50);
-  if(error){document.getElementById('list').innerHTML='<p class=text-red-500 text-sm>Error: '+error.message+'<br>SQL fix chalao: supabase/schema.sql</p>';return;}
-  let html=''; let totalDue=0;
-  (data||[]).forEach(c=>{
-    totalDue+=(c.balance_due||0);
-    html+=`<div class='border p-3 rounded mb-2 flex justify-between'><div><b>${c.name}</b><br><span class='text-xs'>${c.phone||''}</span></div><div class='text-right'><span class='font-bold'>₹${c.balance_due||0}</span></div></div>`;
-  });
-  document.getElementById('list').innerHTML=html||'<p class=text-gray-400 text-sm>Abhi koi customer nahi</p>';
-  document.getElementById('due').innerText='₹'+totalDue;
-}
-async function addCustomer(){
-  const name=document.getElementById('custName').value.trim();
-  const phone=document.getElementById('custPhone').value.trim();
-  const amount=parseFloat(document.getElementById('custAmount').value)||0;
-  if(!name){alert('Naam bharo');return;}
-  if(!supa){alert('Pehle Supabase connect karo');return;}
-  const {error}=await supa.from('customers').insert([{name,phone,balance_due:amount,total_sale:amount}]);
-  if(error){alert('Error: '+error.message);}else{alert('Added ✅');document.getElementById('custName').value='';document.getElementById('custAmount').value='';loadCustomers();}
-}
-async function eraseCustomers(){
-  if(!confirm('Sab customers delete karne hain? Test ke baad hi karo')) return;
-  if(!supa){localStorage.clear();location.reload();return;}
-  const {error}=await supa.from('customers').delete().neq('id','00000000-0000-0000-0000-000000000000');
-  if(error) alert(error.message); else {alert('Sab delete ho gaye ✅'); loadCustomers();}
-}
-loadSupa();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+  document.getElementById('customerForm').addEventListener('submit', event => { event.preventDefault(); const name=document.getElementById('custName').value.trim(); const phone=document.getElementById('custPhone').value.trim(); const amount=Number(document.getElementById('custAmount').value); const error=document.getElementById('error'); error.textContent=''; if(!name || !Number.isFinite(amount) || amount<0){error.textContent='Naam aur valid amount zaroor bharein.';return;} customers.unshift({id:crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),name,phone,amount,createdAt:new Date().toISOString()}); persist(); event.target.reset(); render(); document.getElementById('custName').focus(); });
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('list').addEventListener('click', event => { const button=event.target.closest('[data-delete]'); if(!button)return; customers=customers.filter(c=>c.id!==button.dataset.delete); persist(); render(); });
+  document.getElementById('clearAll').addEventListener('click', () => { if(!customers.length)return; if(confirm('Kya aap sabhi customer records delete karna chahte hain?')){customers=[];persist();render();} });
+  render();
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>
 </html>
