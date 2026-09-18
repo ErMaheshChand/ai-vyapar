@@ -1,0 +1,15 @@
+{
+  "name": "Vyapar AI - Khatabook + Vyapar",
+  "short_name": "Vyapar AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#5B5CFF",
+  "theme_color": "#5B5CFF",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/891/891419.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
