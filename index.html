@@ -2,89 +2,223 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vyapar AI - Apna Business Badhao</title>
+<title>Vyapar AI - Full Business App</title>
 <link rel="manifest" href="/manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50">
-<div id="app" class="max-w-md mx-auto min-h-screen bg-white shadow">
-  <div class="bg-[#5B5CFF] text-white p-5">
-    <h1 class="text-xl font-bold">Vyapar AI</h1>
-    <p class="text-sm opacity-90">Khatabook + Vyapar + AI</p>
-  </div>
-  
-  <div id="setupBox" class="p-4 bg-yellow-50 border m-4 rounded">
-    <h3 class="font-bold">🔑 Supabase Connect (Pehli baar)</h3>
-    <p class="text-xs text-gray-600 mb-2">Vercel env vars ka error hai to yahan direct daal do - safe hai, sirf tumhare browser me save hoga</p>
-    <input id="supaUrl" placeholder="https://xxxx.supabase.co" class="w-full border p-2 rounded mb-2 text-sm">
-    <input id="supaKey" placeholder="anon key eyJ..." class="w-full border p-2 rounded mb-2 text-sm">
-    <button onclick="saveSupa()" class="w-full bg-[#5B5CFF] text-white p-2 rounded">Connect & Save</button>
-    <p class="text-[10px] mt-2 text-gray-500">anon key hi daale, service_role kabhi nahi. RLS se protected hai.</p>
+<body class="bg-gray-100">
+<div class="max-w-5xl mx-auto min-h-screen bg-white shadow flex flex-col">
+  <!-- Header -->
+  <div class="bg-[#5B5CFF] text-white p-4 flex justify-between items-center">
+    <div><h1 class="text-xl font-bold">Vyapar AI</h1><p class="text-xs opacity-80">Final Full Version - Khatabook + Stock + GST Bill</p></div>
+    <button onclick="toggleSetup()" class="bg-white text-[#5B5CFF] px-3 py-1 rounded text-xs font-bold">⚙️ Setup</button>
   </div>
 
-  <div class="p-4">
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="bg-green-50 p-3 rounded"><p class="text-xs">Aaj ka Profit</p><p class="font-bold text-green-700" id="profit">₹0</p></div>
-      <div class="bg-blue-50 p-3 rounded"><p class="text-xs">Udhar Baki</p><p class="font-bold text-blue-700" id="due">₹0</p></div>
+  <!-- Setup Box -->
+  <div id="setupBox" class="hidden p-4 bg-yellow-50 border-b">
+    <h3 class="font-bold text-sm">🔑 Supabase Connect</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+      <input id="supaUrl" placeholder="https://xxxx.supabase.co" class="border p-2 rounded text-sm">
+      <input id="supaKey" placeholder="anon key eyJ..." class="border p-2 rounded text-sm">
     </div>
-    <input id="custName" placeholder="Customer ka naam" class="w-full border p-3 rounded mb-2">
-    <input id="custPhone" placeholder="Phone (optional)" class="w-full border p-3 rounded mb-2">
-    <input id="custAmount" type="number" placeholder="Amount ₹" class="w-full border p-3 rounded mb-2">
-    <button onclick="addCustomer()" class="w-full bg-[#5B5CFF] text-white p-3 rounded font-bold">+ Customer Add Karo</button>
-    <button onclick="eraseCustomers()" class="w-full mt-2 bg-red-50 text-red-600 p-2 rounded text-sm">🗑️ Sab Customers Delete (Test ke liye)</button>
-    <div id="list" class="mt-4"></div>
+    <div class="flex gap-2 mt-2">
+      <button onclick="saveSupa()" class="bg-[#5B5CFF] text-white px-4 py-2 rounded text-sm">Connect & Save</button>
+      <button onclick="runSchemaInfo()" class="bg-gray-200 px-4 py-2 rounded text-sm">Schema SQL dikhao</button>
+    </div>
+    <p class="text-[10px] mt-2">Supabase -> SQL Editor me supabase/schema.sql run karo, fir 30 sec baad reload. Error: balance_due / invoice_no fix isi me hai.</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex overflow-x-auto border-b bg-white sticky top-0 z-10">
+    <button onclick="showTab('dash')" id="tab-dash" class="tab-btn flex-1 p-3 text-sm font-bold border-b-2 border-[#5B5CFF] text-[#5B5CFF]">📊 Dashboard</button>
+    <button onclick="showTab('cust')" id="tab-cust" class="tab-btn flex-1 p-3 text-sm">👥 Customers</button>
+    <button onclick="showTab('prod')" id="tab-prod" class="tab-btn flex-1 p-3 text-sm">📦 Stock</button>
+    <button onclick="showTab('bill')" id="tab-bill" class="tab-btn flex-1 p-3 text-sm">🧾 Bill</button>
+    <button onclick="showTab('sales')" id="tab-sales" class="tab-btn flex-1 p-3 text-sm">📑 Sales</button>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 p-4">
+    <!-- DASHBOARD -->
+    <div id="view-dash">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="bg-green-50 p-4 rounded border"><p class="text-xs">Total Sales</p><p class="font-bold text-lg" id="stat-sales">₹0</p></div>
+        <div class="bg-blue-50 p-4 rounded border"><p class="text-xs">Udhar Baki</p><p class="font-bold text-lg" id="stat-due">₹0</p></div>
+        <div class="bg-purple-50 p-4 rounded border"><p class="text-xs">Customers</p><p class="font-bold text-lg" id="stat-cust">0</p></div>
+        <div class="bg-orange-50 p-4 rounded border"><p class="text-xs">Products</p><p class="font-bold text-lg" id="stat-prod">0</p></div>
+      </div>
+      <div class="mt-4">
+        <h3 class="font-bold text-sm mb-2">Business Settings (Bill pe ayega)</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <input id="bizName" placeholder="Business Name" class="border p-2 rounded text-sm">
+          <input id="bizGstin" placeholder="GSTIN" class="border p-2 rounded text-sm">
+          <input id="bizUpi" placeholder="UPI ID" class="border p-2 rounded text-sm">
+        </div>
+        <button onclick="saveBiz()" class="mt-2 bg-black text-white px-4 py-2 rounded text-sm">Save Settings</button>
+      </div>
+      <div class="mt-6 p-3 bg-gray-50 rounded text-xs">
+        <b>Final Project Features:</b> Khatabook (balance_due fix), Stock (products), GST Bill (invoice_no, CGST/SGST, items JSON), Payments UTR, Dashboard, PWA Ready.
+      </div>
+    </div>
+
+    <!-- CUSTOMERS -->
+    <div id="view-cust" class="hidden">
+      <div class="flex gap-2 mb-3">
+        <input id="custName" placeholder="Customer naam" class="flex-1 border p-2 rounded text-sm">
+        <input id="custPhone" placeholder="Phone" class="w-32 border p-2 rounded text-sm">
+        <input id="custAmount" type="number" placeholder="Udhar ₹" class="w-24 border p-2 rounded text-sm">
+      </div>
+      <button onclick="addCustomer()" class="w-full bg-[#5B5CFF] text-white p-2 rounded text-sm font-bold">+ Customer Add</button>
+      <div id="custList" class="mt-3 space-y-2"></div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div id="view-prod" class="hidden">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+        <input id="prodName" placeholder="Product naam" class="border p-2 rounded text-sm">
+        <input id="prodCost" type="number" placeholder="Cost Price" class="border p-2 rounded text-sm">
+        <input id="prodSell" type="number" placeholder="Sell Price" class="border p-2 rounded text-sm">
+        <input id="prodStock" type="number" placeholder="Stock Qty" class="border p-2 rounded text-sm">
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <input id="prodGst" type="number" placeholder="GST % (18)" class="border p-2 rounded text-sm">
+        <input id="prodHsn" placeholder="HSN Code" class="border p-2 rounded text-sm">
+      </div>
+      <button onclick="addProduct()" class="w-full bg-green-600 text-white p-2 rounded text-sm font-bold">+ Product Add</button>
+      <div id="prodList" class="mt-3 space-y-2"></div>
+    </div>
+
+    <!-- BILLING -->
+    <div id="view-bill" class="hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <select id="billCustomer" class="border p-2 rounded text-sm"><option>Customer select karo</option></select>
+        <input id="billInvoice" placeholder="Invoice No - INV-001" class="border p-2 rounded text-sm">
+      </div>
+      <div class="mt-3 border rounded p-3">
+        <h4 class="text-sm font-bold mb-2">Product Add to Bill</h4>
+        <div class="flex gap-2">
+          <select id="billProduct" class="flex-1 border p-2 rounded text-sm"></select>
+          <input id="billQty" type="number" value="1" class="w-20 border p-2 rounded text-sm">
+          <button onclick="addToBill()" class="bg-black text-white px-3 rounded text-sm">Add</button>
+        </div>
+        <div id="billItems" class="mt-3 text-sm"></div>
+        <div class="mt-3 border-t pt-2 text-sm">
+          <div class="flex justify-between"><span>Subtotal</span><span id="billSub">₹0</span></div>
+          <div class="flex justify-between"><span>GST</span><span id="billGst">₹0</span></div>
+          <div class="flex justify-between font-bold text-base"><span>Total</span><span id="billTotal">₹0</span></div>
+        </div>
+        <button onclick="createBill()" class="w-full mt-3 bg-[#5B5CFF] text-white p-3 rounded font-bold">🧾 Bill Create & Save</button>
+      </div>
+    </div>
+
+    <!-- SALES -->
+    <div id="view-sales" class="hidden">
+      <div id="salesList" class="space-y-2 text-sm"></div>
+    </div>
   </div>
 </div>
 
 <script>
-let supa=null;
-function loadSupa(){
-  const url=localStorage.getItem('SUPA_URL')||'';
-  const key=localStorage.getItem('SUPA_KEY')||'';
-  document.getElementById('supaUrl').value=url;
-  document.getElementById('supaKey').value=key;
-  if(url&&key){
-    supa=window.supabase.createClient(url,key);
-    document.getElementById('setupBox').classList.add('hidden');
-    loadCustomers();
-  }
+let supa=null, billCart=[];
+function showTab(t){
+  document.querySelectorAll('[id^=view-]').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('view-'+t).classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('border-[#5B5CFF]','text-[#5B5CFF]','border-b-2');});
+  document.getElementById('tab-'+t).classList.add('border-[#5B5CFF]','text-[#5B5CFF]','border-b-2');
+  if(t==='dash') loadStats();
+  if(t==='cust') loadCustomers();
+  if(t==='prod') loadProducts();
+  if(t==='sales') loadSales();
+  if(t==='bill') {loadCustomersForBill(); loadProductsForBill();}
 }
+function toggleSetup(){document.getElementById('setupBox').classList.toggle('hidden');}
 function saveSupa(){
   const url=document.getElementById('supaUrl').value.trim();
   const key=document.getElementById('supaKey').value.trim();
-  if(!url||!key){alert('URL aur Key dono bharo');return;}
-  localStorage.setItem('SUPA_URL',url);
-  localStorage.setItem('SUPA_KEY',key);
-  location.reload();
+  if(!url||!key){alert('URL + Key bharo');return;}
+  localStorage.setItem('SUPA_URL',url); localStorage.setItem('SUPA_KEY',key); location.reload();
+}
+function loadSupa(){
+  const url=localStorage.getItem('SUPA_URL')||''; const key=localStorage.getItem('SUPA_KEY')||'';
+  document.getElementById('supaUrl').value=url; document.getElementById('supaKey').value=key;
+  document.getElementById('bizName').value=localStorage.getItem('BIZ_NAME')||'';
+  document.getElementById('bizGstin').value=localStorage.getItem('BIZ_GSTIN')||'';
+  document.getElementById('bizUpi').value=localStorage.getItem('BIZ_UPI')||'';
+  if(url&&key){ supa=window.supabase.createClient(url,key); document.getElementById('setupBox').classList.add('hidden'); loadStats(); loadCustomers(); loadProducts(); }
+}
+function saveBiz(){ localStorage.setItem('BIZ_NAME',document.getElementById('bizName').value); localStorage.setItem('BIZ_GSTIN',document.getElementById('bizGstin').value); localStorage.setItem('BIZ_UPI',document.getElementById('bizUpi').value); alert('Saved ✅');}
+function runSchemaInfo(){ alert('GitHub repo me supabase/schema.sql file hai. Supabase -> SQL Editor me paste karke Run karo. Fir notify pgrst reload ho jayega.'); }
+
+async function loadStats(){
+  if(!supa) return;
+  const [c,p,s]=await Promise.all([supa.from('customers').select('*'), supa.from('products').select('*'), supa.from('sales').select('*')]);
+  document.getElementById('stat-cust').innerText=(c.data||[]).length;
+  document.getElementById('stat-prod').innerText=(p.data||[]).length;
+  let due=0,total=0; (c.data||[]).forEach(x=>due+=(x.balance_due||0)); (s.data||[]).forEach(x=>total+=(x.total||0));
+  document.getElementById('stat-due').innerText='₹'+due; document.getElementById('stat-sales').innerText='₹'+total;
 }
 async function loadCustomers(){
   if(!supa) return;
-  const {data,error}=await supa.from('customers').select('*').order('created_at',{ascending:false}).limit(50);
-  if(error){document.getElementById('list').innerHTML='<p class=text-red-500 text-sm>Error: '+error.message+'<br>SQL fix chalao: supabase/schema.sql</p>';return;}
-  let html=''; let totalDue=0;
-  (data||[]).forEach(c=>{
-    totalDue+=(c.balance_due||0);
-    html+=`<div class='border p-3 rounded mb-2 flex justify-between'><div><b>${c.name}</b><br><span class='text-xs'>${c.phone||''}</span></div><div class='text-right'><span class='font-bold'>₹${c.balance_due||0}</span></div></div>`;
-  });
-  document.getElementById('list').innerHTML=html||'<p class=text-gray-400 text-sm>Abhi koi customer nahi</p>';
-  document.getElementById('due').innerText='₹'+totalDue;
+  const {data,error}=await supa.from('customers').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error){document.getElementById('custList').innerHTML='<p class=text-red-500>'+error.message+'</p>'; return;}
+  document.getElementById('custList').innerHTML=(data||[]).map(c=>`<div class='border p-2 rounded flex justify-between'><div><b>${c.name}</b><div class='text-xs text-gray-500'>${c.phone||''} | Due: ₹${c.balance_due||0}</div></div><button onclick="delCustomer('${c.id}')" class='text-red-500 text-xs'>Delete</button></div>`).join('')||'<p class=text-gray-400>No customers</p>';
 }
 async function addCustomer(){
-  const name=document.getElementById('custName').value.trim();
-  const phone=document.getElementById('custPhone').value.trim();
-  const amount=parseFloat(document.getElementById('custAmount').value)||0;
-  if(!name){alert('Naam bharo');return;}
-  if(!supa){alert('Pehle Supabase connect karo');return;}
-  const {error}=await supa.from('customers').insert([{name,phone,balance_due:amount,total_sale:amount}]);
-  if(error){alert('Error: '+error.message);}else{alert('Added ✅');document.getElementById('custName').value='';document.getElementById('custAmount').value='';loadCustomers();}
+  const name=document.getElementById('custName').value.trim(); const phone=document.getElementById('custPhone').value.trim(); const amt=parseFloat(document.getElementById('custAmount').value)||0;
+  if(!name){alert('Naam bharo');return;} if(!supa){alert('Supabase connect karo');return;}
+  const {error}=await supa.from('customers').insert([{name,phone,balance_due:amt,total_sale:amt}]);
+  if(error) alert(error.message); else {document.getElementById('custName').value=''; document.getElementById('custAmount').value=''; loadCustomers(); loadStats();}
 }
-async function eraseCustomers(){
-  if(!confirm('Sab customers delete karne hain? Test ke baad hi karo')) return;
-  if(!supa){localStorage.clear();location.reload();return;}
-  const {error}=await supa.from('customers').delete().neq('id','00000000-0000-0000-0000-000000000000');
-  if(error) alert(error.message); else {alert('Sab delete ho gaye ✅'); loadCustomers();}
+async function delCustomer(id){ if(!confirm('Delete?')) return; await supa.from('customers').delete().eq('id',id); loadCustomers(); }
+
+async function loadProducts(){
+  if(!supa) return;
+  const {data,error}=await supa.from('products').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error){document.getElementById('prodList').innerHTML='<p class=text-red-500>'+error.message+'</p>';return;}
+  document.getElementById('prodList').innerHTML=(data||[]).map(p=>`<div class='border p-2 rounded flex justify-between'><div><b>${p.name}</b><div class='text-xs'>Sell ₹${p.selling_price} | Stock ${p.stock} | GST ${p.gst_rate}%</div></div><button onclick="delProduct('${p.id}')" class='text-red-500 text-xs'>Del</button></div>`).join('')||'<p class=text-gray-400>No products</p>';
 }
+async function addProduct(){
+  const name=document.getElementById('prodName').value.trim(); const cost=parseFloat(document.getElementById('prodCost').value)||0; const sell=parseFloat(document.getElementById('prodSell').value)||0; const stock=parseInt(document.getElementById('prodStock').value)||0; const gst=parseInt(document.getElementById('prodGst').value)||18; const hsn=document.getElementById('prodHsn').value.trim();
+  if(!name){alert('Product naam bharo');return;} if(!supa){alert('Supabase connect karo');return;}
+  const {error}=await supa.from('products').insert([{name,cost_price:cost,selling_price:sell,stock,gst_rate:gst,hsn_code:hsn}]);
+  if(error) alert(error.message); else {['prodName','prodCost','prodSell','prodStock','prodHsn'].forEach(id=>document.getElementById(id).value=''); loadProducts(); loadStats();}
+}
+async function delProduct(id){ if(!confirm('Delete product?')) return; await supa.from('products').delete().eq('id',id); loadProducts(); }
+
+async function loadCustomersForBill(){ if(!supa) return; const {data}=await supa.from('customers').select('*'); document.getElementById('billCustomer').innerHTML='<option value="">Customer select karo</option>'+(data||[]).map(c=>`<option value="${c.id}">${c.name}</option>`).join(''); }
+async function loadProductsForBill(){ if(!supa) return; const {data}=await supa.from('products').select('*'); document.getElementById('billProduct').innerHTML=(data||[]).map(p=>`<option value="${p.id}" data-price="${p.selling_price}" data-gst="${p.gst_rate}" data-name="${p.name}">${p.name} - ₹${p.selling_price}</option>`).join(''); }
+
+function addToBill(){
+  const sel=document.getElementById('billProduct'); if(!sel.value){alert('Product select karo');return;}
+  const opt=sel.options[sel.selectedIndex]; const id=opt.value; const name=opt.getAttribute('data-name'); const price=parseFloat(opt.getAttribute('data-price'))||0; const gstRate=parseFloat(opt.getAttribute('data-gst'))||18; const qty=parseInt(document.getElementById('billQty').value)||1;
+  billCart.push({id,name,price,gstRate,qty,line:price*qty});
+  renderBill();
+}
+function renderBill(){
+  let sub=0,gstTot=0; billCart.forEach(i=>{ sub+=i.line; gstTot+= i.line * i.gstRate/100; });
+  document.getElementById('billItems').innerHTML=billCart.map((i,idx)=>`<div class='flex justify-between border-b py-1'><span>${i.name} x${i.qty}</span><span>₹${i.line} <button onclick="billCart.splice(${idx},1);renderBill()" class='text-red-500 ml-2'>x</button></span></div>`).join('')||'<p class=text-gray-400>Empty</p>';
+  document.getElementById('billSub').innerText='₹'+sub.toFixed(2);
+  document.getElementById('billGst').innerText='₹'+gstTot.toFixed(2);
+  document.getElementById('billTotal').innerText='₹'+(sub+gstTot).toFixed(2);
+}
+async function createBill(){
+  if(!supa){alert('Supabase connect karo');return;}
+  if(billCart.length===0){alert('Cart empty');return;}
+  const custId=document.getElementById('billCustomer').value||null;
+  const inv=document.getElementById('billInvoice').value.trim()||'INV-'+Date.now().toString().slice(-6);
+  let sub=0,gstTot=0; billCart.forEach(i=>{ sub+=i.line; gstTot+= i.line * i.gstRate/100; });
+  const total=sub+gstTot;
+  const {error}=await supa.from('sales').insert([{invoice_no:inv,customer_id:custId,subtotal:sub,gst_total:gstTot,cgst:gstTot/2,sgst:gstTot/2,total,items:billCart,payment_status:'paid'}]);
+  if(error){alert('Error: '+error.message);}else{alert('Bill Created ✅ '+inv); billCart=[]; renderBill(); document.getElementById('billInvoice').value=''; loadSales(); loadStats();}
+}
+async function loadSales(){
+  if(!supa) return;
+  const {data,error}=await supa.from('sales').select('*, customers(name)').order('created_at',{ascending:false}).limit(50);
+  if(error){document.getElementById('salesList').innerHTML='<p class=text-red-500>'+error.message+'</p>';return;}
+  document.getElementById('salesList').innerHTML=(data||[]).map(s=>`<div class='border p-2 rounded'><div class='flex justify-between'><b>${s.invoice_no}</b><span class='font-bold'>₹${s.total}</span></div><div class='text-xs text-gray-500'>${s.customers?.name||'Walk-in'} | ${new Date(s.created_at).toLocaleString()} | GST ₹${s.gst_total}</div></div>`).join('')||'<p class=text-gray-400>No sales</p>';
+}
+
 loadSupa();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 </script>

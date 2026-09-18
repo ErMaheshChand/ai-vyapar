@@ -1,23 +1,16 @@
-# Vyapar AI - GitHub Ready
+# Vyapar AI - Final Full Project
 
-### Vercel pe Deploy kaise kare (Mobile se bhi)
+Ye final wala pura project hai: Dashboard + Customers (Khatabook) + Stock + GST Bill + Sales
 
-1. GitHub pe New Repo `vyapar-ai` banao -> is zip ke files upload karo
-2. vercel.com -> Add New Project -> Import Git Repository `vyapar-ai`
-3. Import karte hi Environment Variables ka box ayega:
-   - NEXT_PUBLIC_SUPABASE_URL = https://xxxx.supabase.co
-   - NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJ...
-4. Deploy -> Ready
+## Deploy
+1. GitHub repo ai-vyapar me is zip ke files se replace karo (Upload)
+2. Vercel auto-deploy karega
+3. Supabase me supabase/schema.sql run karo (balance_due, invoice_no fix included)
+4. Site kholke Setup me Supabase URL + anon key daalo
 
-Agar Vercel Drop wala project ka Settings page error de raha hai, to ye GitHub wala method 100% kaam karega.
-
-### Supabase Setup
-- supabase.com -> New Project (Mumbai)
-- SQL Editor -> supabase/schema.sql run karo (ye repo me hai)
-- Settings -> API se URL aur anon key copy karo
-
-### Security
-- anon key public hai, RLS se protected hai
-- service_role key kabhi bhi frontend me mat daalo, kabhi share mat karo
-
-App khulne ke baad Settings me UPI ID, GSTIN, Business Name bhar do.
+## Modules
+- Customers: balance_due, total_sale, phone
+- Products: cost_price, selling_price, stock, gst_rate, hsn_code
+- Sales: invoice_no, subtotal, gst_total, cgst, sgst, items jsonb
+- Payments: UTR, UPI app, verified
+- Business Settings: localStorage me
