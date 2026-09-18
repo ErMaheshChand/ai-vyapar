@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/32366876/README.md)
 # Vyapar AI - GitHub Ready
 
 ### Vercel pe Deploy kaise kare (Mobile se bhi)
