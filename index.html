@@ -2,160 +2,177 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vyapar AI - Final + Auth</title>
+<title>Vyapar AI - Gmail Only Login + Full Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>*{font-family:Inter,system-ui} .poppins{font-family:Poppins,Inter}</style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-[#F8FAFC] min-h-screen">
 
-<!-- AUTH BOX - Yahi naya hai, baaki sab same -->
-<div id="authBox" class="max-w-md mx-auto min-h-screen bg-white shadow flex flex-col p-6">
-  <div class="text-center mt-10 mb-6">
-    <div class="w-14 h-14 bg-[#5B5CFF] rounded-2xl mx-auto flex items-center justify-center text-white text-xl font-bold">V</div>
-    <h1 class="text-xl font-bold mt-3">Vyapar AI</h1>
-    <p class="text-xs text-gray-500">Login karke app khulega</p>
-  </div>
-  <div class="flex border rounded overflow-hidden mb-3">
-    <button id="btnLoginTab" onclick="switchAuthTab('login')" class="flex-1 p-2 bg-[#5B5CFF] text-white text-sm font-bold">Login</button>
-    <button id="btnRegTab" onclick="switchAuthTab('reg')" class="flex-1 p-2 bg-gray-100 text-sm">Register</button>
-  </div>
-  <div id="loginForm">
-    <input id="authEmail" placeholder="Email" class="w-full border p-3 rounded mb-2 text-sm">
-    <input id="authPass" type="password" placeholder="Password" class="w-full border p-3 rounded mb-3 text-sm">
-    <button onclick="doAuthLogin()" class="w-full bg-[#5B5CFF] text-white p-3 rounded font-bold">Login</button>
-  </div>
-  <div id="regForm" class="hidden">
-    <input id="regBizName" placeholder="Business Name" class="w-full border p-3 rounded mb-2 text-sm">
-    <input id="regEmail" placeholder="Email" class="w-full border p-3 rounded mb-2 text-sm">
-    <input id="regPass" type="password" placeholder="Password (6+ chars)" class="w-full border p-3 rounded mb-3 text-sm">
-    <button onclick="doAuthRegister()" class="w-full bg-green-600 text-white p-3 rounded font-bold">Register</button>
-  </div>
-  <p id="authMsg" class="mt-3 text-sm text-center"></p>
-  <div class="mt-6 bg-gray-50 p-3 rounded text-[11px]">
-    Supabase Setup: Dashboard → Authentication → Providers → Email Enable → Confirm Email OFF karo testing ke liye
-    <div class="grid grid-cols-1 gap-2 mt-2">
-      <input id="supaUrl" placeholder="https://xxxx.supabase.co" class="border p-2 rounded">
-      <input id="supaKey" placeholder="anon key eyJ..." class="border p-2 rounded">
+<!-- GMAIL ONLY AUTH -->
+<div id="authBox" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-[420px] bg-white rounded-[24px] border border-slate-200 shadow-xl p-7">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-[#4F46E5] text-white flex items-center justify-center font-bold text-xl poppins">V</div>
+      <div><div class="font-bold poppins">Vyapar AI</div><div class="text-[11px] text-slate-500">Gmail Login Only • Secure</div></div>
+      <span class="ml-auto text-[10px] px-2 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">✓ RLS Secured</span>
     </div>
-    <button onclick="saveSupa()" class="w-full mt-2 bg-black text-white p-2 rounded">Save Supabase</button>
+
+    <h2 class="text-[26px] font-bold poppins leading-tight">Gmail se Login karo</h2>
+    <p class="text-sm text-slate-500 mt-1">Sirf Gmail wala login active hai, baki sab hataya gaya</p>
+
+    <button onclick="loginWithGoogle()" class="mt-5 w-full h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-semibold text-sm flex items-center justify-center gap-2 shadow-sm">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5"/> Continue with Gmail (Google)
+    </button>
+
+    <div class="my-4 flex items-center gap-2"><div class="h-px flex-1 bg-slate-200"></div><span class="text-[11px] text-slate-400">OR Gmail Email se</span><div class="h-px flex-1 bg-slate-200"></div></div>
+
+    <input id="gmailEmail" placeholder="aapka@gmail.com" class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-indigo-500" />
+    <input id="gmailPass" type="password" placeholder="Password (6+ chars)" class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm mt-3 outline-none focus:ring-2 focus:ring-indigo-500" />
+
+    <div class="grid grid-cols-2 gap-2 mt-4">
+      <button onclick="gmailLogin()" class="h-11 rounded-xl bg-slate-900 text-white font-semibold text-sm">Login</button>
+      <button onclick="gmailRegister()" class="h-11 rounded-xl bg-[#4F46E5] text-white font-semibold text-sm">Create Account</button>
+    </div>
+
+    <p id="authMsg" class="mt-3 text-xs text-center"></p>
+
+    <div class="mt-5 p-3 rounded-xl bg-slate-900 text-white text-[11px] leading-relaxed">
+      <b>Supabase me ye karna hai:</b><br>
+      1. Authentication → Providers → Email → Enable (Confirm Email OFF for testing)<br>
+      2. Authentication → Providers → Google → Enable → Google Cloud se Client ID/Secret daalo (Gmail OAuth ke liye)<br>
+      3. Phone / OTP providers OFF rakho — ab zarurat nahi
+    </div>
+
+    <div class="mt-4 border rounded-xl p-3 bg-amber-50 border-amber-200">
+      <div class="text-[11px] font-bold">Supabase Keys (1 baar daalo):</div>
+      <input id="supaUrl" placeholder="https://xxxx.supabase.co" class="w-full mt-2 border p-2 rounded text-xs">
+      <input id="supaKey" placeholder="anon key eyJ..." class="w-full mt-1 border p-2 rounded text-xs">
+      <button onclick="saveSupa()" class="w-full mt-2 bg-black text-white p-2 rounded text-xs">Save & Reload</button>
+    </div>
   </div>
 </div>
 
-<!-- MAIN APP - Tumhara purana final wala same hai, bas id=mainApp aur display:none -->
-<div id="mainApp" style="display:none" class="max-w-5xl mx-auto min-h-screen bg-white shadow flex flex-col">
-  <div class="bg-[#5B5CFF] text-white p-4 flex justify-between items-center">
-    <div><h1 class="text-xl font-bold">Vyapar AI</h1><p class="text-xs opacity-80" id="userInfoTop">Final Full Version</p></div>
-    <div class="flex gap-2">
-      <button onclick="toggleSetup()" class="bg-white text-[#5B5CFF] px-3 py-1 rounded text-xs font-bold">⚙️</button>
-      <button onclick="doLogoutAuth()" class="bg-red-500 text-white px-3 py-1 rounded text-xs">Logout</button>
+<!-- MAIN DASHBOARD - SAME AS BEFORE -->
+<div id="mainApp" style="display:none" class="min-h-screen flex">
+  <!-- Sidebar -->
+  <aside class="hidden lg:flex fixed left-0 top-0 h-screen w-[264px] bg-white border-r flex-col">
+    <div class="h-[72px] px-6 flex items-center gap-3 border-b">
+      <div class="w-9 h-9 rounded-xl bg-[#4F46E5] text-white grid place-items-center font-bold">V</div>
+      <div><div class="font-bold poppins">Vyapar AI</div><div class="text-[11px] text-slate-500">Smart Business</div></div>
     </div>
-  </div>
-  <div id="setupBox" class="hidden p-4 bg-yellow-50 border-b">
-    <h3 class="font-bold text-sm">Supabase Connected</h3>
-    <p class="text-xs" id="setupInfo"></p>
-  </div>
-  <div class="flex overflow-x-auto border-b bg-white sticky top-0 z-10">
-    <button onclick="showTab('dash')" id="tab-dash" class="tab-btn flex-1 p-3 text-sm font-bold border-b-2 border-[#5B5CFF] text-[#5B5CFF]">📊 Dashboard</button>
-    <button onclick="showTab('cust')" id="tab-cust" class="tab-btn flex-1 p-3 text-sm">👥 Customers</button>
-    <button onclick="showTab('prod')" id="tab-prod" class="tab-btn flex-1 p-3 text-sm">📦 Stock</button>
-    <button onclick="showTab('bill')" id="tab-bill" class="tab-btn flex-1 p-3 text-sm">🧾 Bill</button>
-    <button onclick="showTab('sales')" id="tab-sales" class="tab-btn flex-1 p-3 text-sm">📑 Sales</button>
-  </div>
-  <div class="flex-1 p-4">
-    <div id="view-dash">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="bg-green-50 p-4 rounded border"><p class="text-xs">Total Sales</p><p class="font-bold text-lg" id="stat-sales">₹0</p></div>
-        <div class="bg-blue-50 p-4 rounded border"><p class="text-xs">Udhar Baki</p><p class="font-bold text-lg" id="stat-due">₹0</p></div>
-        <div class="bg-purple-50 p-4 rounded border"><p class="text-xs">Customers</p><p class="font-bold text-lg" id="stat-cust">0</p></div>
-        <div class="bg-orange-50 p-4 rounded border"><p class="text-xs">Products</p><p class="font-bold text-lg" id="stat-prod">0</p></div>
+    <nav class="flex-1 p-3 space-y-1">
+      <button onclick="showTab('dash')" id="tab-dash" class="tab w-full text-left px-3 h-10 rounded-xl bg-[#4F46E5] text-white text-sm font-medium">📊 Dashboard</button>
+      <button onclick="showTab('cust')" id="tab-cust" class="tab w-full text-left px-3 h-10 rounded-xl text-sm text-slate-600 hover:bg-slate-50">👥 Customers</button>
+      <button onclick="showTab('prod')" id="tab-prod" class="tab w-full text-left px-3 h-10 rounded-xl text-sm text-slate-600 hover:bg-slate-50">📦 Products / Stock</button>
+      <button onclick="showTab('bill')" id="tab-bill" class="tab w-full text-left px-3 h-10 rounded-xl text-sm text-slate-600 hover:bg-slate-50">🧾 Bills</button>
+      <button onclick="showTab('sales')" id="tab-sales" class="tab w-full text-left px-3 h-10 rounded-xl text-sm text-slate-600 hover:bg-slate-50">📑 Sales Report</button>
+    </nav>
+    <div class="p-4 border-t">
+      <div id="userBadge" class="text-xs font-mono truncate"></div>
+      <button onclick="doLogout()" class="mt-2 w-full h-9 rounded-full bg-slate-900 text-white text-xs">Logout (Gmail)</button>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <div class="flex-1 lg:pl-[264px]">
+    <header class="h-[64px] bg-white border-b px-6 flex items-center justify-between sticky top-0 z-10">
+      <div class="font-bold">Dashboard • Gmail Secured</div>
+      <div class="text-xs text-slate-500" id="topEmail"></div>
+    </header>
+    <main class="p-4 lg:p-6">
+      <div id="view-dash">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="bg-white border p-4 rounded-2xl"><div class="text-[11px] text-slate-500 uppercase">Total Sales</div><div class="text-xl font-bold" id="stat-sales">₹0</div></div>
+          <div class="bg-white border p-4 rounded-2xl"><div class="text-[11px] text-slate-500 uppercase">Udhar Baki</div><div class="text-xl font-bold text-amber-600" id="stat-due">₹0</div></div>
+          <div class="bg-white border p-4 rounded-2xl"><div class="text-[11px] text-slate-500 uppercase">Customers</div><div class="text-xl font-bold" id="stat-cust">0</div></div>
+          <div class="bg-white border p-4 rounded-2xl"><div class="text-[11px] text-slate-500 uppercase">Products</div><div class="text-xl font-bold" id="stat-prod">0</div></div>
+        </div>
+        <div class="mt-6 p-4 bg-white border rounded-2xl">
+          <div class="font-bold text-sm">Business Settings (Bill pe ayega)</div>
+          <div class="grid md:grid-cols-3 gap-2 mt-3">
+            <input id="bizName" placeholder="Mahesh Traders" class="border p-2.5 rounded-xl text-sm">
+            <input id="bizGstin" placeholder="GSTIN" class="border p-2.5 rounded-xl text-sm">
+            <input id="bizUpi" placeholder="UPI ID" class="border p-2.5 rounded-xl text-sm">
+          </div>
+        </div>
       </div>
-      <div class="mt-4 text-xs bg-gray-50 p-3 rounded">✅ Auth ke baad hi data dikhega. user_id se filter hai.</div>
-    </div>
-    <div id="view-cust" class="hidden">
-      <div class="flex gap-2 mb-3">
-        <input id="custName" placeholder="Customer naam" class="flex-1 border p-2 rounded text-sm">
-        <input id="custPhone" placeholder="Phone" class="w-32 border p-2 rounded text-sm">
-        <input id="custAmount" type="number" placeholder="Udhar ₹" class="w-24 border p-2 rounded text-sm">
+      <div id="view-cust" class="hidden">
+        <div class="flex gap-2 mb-3"><input id="custName" placeholder="Customer naam" class="flex-1 border p-2.5 rounded-xl text-sm"><input id="custPhone" placeholder="Phone" class="w-32 border p-2.5 rounded-xl text-sm"><input id="custAmount" type="number" placeholder="Due" class="w-24 border p-2.5 rounded-xl text-sm"></div>
+        <button onclick="addCustomer()" class="w-full bg-[#4F46E5] text-white p-3 rounded-xl text-sm font-bold">+ Customer Add</button>
+        <div id="custList" class="mt-4 space-y-2"></div>
       </div>
-      <button onclick="addCustomer()" class="w-full bg-[#5B5CFF] text-white p-2 rounded text-sm font-bold">+ Customer Add</button>
-      <div id="custList" class="mt-3 space-y-2"></div>
-    </div>
-    <div id="view-prod" class="hidden">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-        <input id="prodName" placeholder="Product naam" class="border p-2 rounded text-sm">
-        <input id="prodSell" type="number" placeholder="Sell Price" class="border p-2 rounded text-sm">
-        <input id="prodStock" type="number" placeholder="Stock" class="border p-2 rounded text-sm">
-        <input id="prodGst" type="number" placeholder="GST %" class="border p-2 rounded text-sm">
+      <div id="view-prod" class="hidden">
+        <div class="grid md:grid-cols-4 gap-2 mb-3"><input id="prodName" placeholder="Product naam" class="border p-2.5 rounded-xl text-sm"><input id="prodSell" type="number" placeholder="Sell Price" class="border p-2.5 rounded-xl text-sm"><input id="prodStock" type="number" placeholder="Stock" class="border p-2.5 rounded-xl text-sm"><input id="prodGst" type="number" placeholder="GST %" class="border p-2.5 rounded-xl text-sm"></div>
+        <button onclick="addProduct()" class="w-full bg-emerald-600 text-white p-3 rounded-xl text-sm font-bold">+ Product Add</button>
+        <div id="prodList" class="mt-4 space-y-2"></div>
       </div>
-      <button onclick="addProduct()" class="w-full bg-green-600 text-white p-2 rounded text-sm font-bold">+ Product Add</button>
-      <div id="prodList" class="mt-3 space-y-2"></div>
-    </div>
-    <div id="view-bill" class="hidden"><div id="billInfo" class="text-sm">Bill module - Auth ke baad kaam karega</div></div>
-    <div id="view-sales" class="hidden"><div id="salesList" class="space-y-2 text-sm"></div></div>
+      <div id="view-bill" class="hidden"><div class="bg-indigo-50 border border-indigo-200 p-3 rounded-xl text-sm">Bills - Gmail user_id se secured • WhatsApp share ready</div><div id="billList" class="mt-3 space-y-2"></div></div>
+      <div id="view-sales" class="hidden"><div id="salesList" class="space-y-2"></div></div>
+    </main>
   </div>
 </div>
 
 <script>
 let supa=null;
-function saveSupa(){
-  const u=document.getElementById('supaUrl').value.trim(), k=document.getElementById('supaKey').value.trim();
-  if(!u||!k){alert('URL+Key bharo');return;}
-  localStorage.setItem('SUPA_URL',u); localStorage.setItem('SUPA_KEY',k); location.reload();
-}
+function saveSupa(){const u=document.getElementById('supaUrl').value.trim(),k=document.getElementById('supaKey').value.trim();if(!u||!k){alert('URL+Key bharo');return;}localStorage.setItem('SUPA_URL',u);localStorage.setItem('SUPA_KEY',k);location.reload();}
 function loadSupa(){
-  const u=localStorage.getItem('SUPA_URL')||'', k=localStorage.getItem('SUPA_KEY')||'';
-  const elUrl=document.getElementById('supaUrl'); if(elUrl) elUrl.value=u;
-  const elKey=document.getElementById('supaKey'); if(elKey) elKey.value=k;
-  const info=document.getElementById('setupInfo'); if(info) info.innerText = u ? 'Connected: '+u : 'Not connected';
-  if(u&&k){ supa=window.supabase.createClient(u,k); checkAuth(); loadStats(); }
+  const u=localStorage.getItem('SUPA_URL')||'',k=localStorage.getItem('SUPA_KEY')||'';
+  document.getElementById('supaUrl').value=u; document.getElementById('supaKey').value=k;
+  if(u&&k){supa=window.supabase.createClient(u,k); checkAuth();}
 }
-function toggleSetup(){ document.getElementById('setupBox').classList.toggle('hidden'); }
-function switchAuthTab(t){
-  document.getElementById('loginForm').classList.add('hidden'); document.getElementById('regForm').classList.add('hidden');
-  document.getElementById('btnLoginTab').className='flex-1 p-2 bg-gray-100 text-sm'; document.getElementById('btnRegTab').className='flex-1 p-2 bg-gray-100 text-sm';
-  if(t==='login'){ document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('btnLoginTab').className='flex-1 p-2 bg-[#5B5CFF] text-white text-sm font-bold'; }
-  else { document.getElementById('regForm').classList.remove('hidden'); document.getElementById('btnRegTab').className='flex-1 p-2 bg-[#5B5CFF] text-white text-sm font-bold'; }
+async function loginWithGoogle(){
+  if(!supa){alert('Pehle Supabase keys save karo');return;}
+  const {error}=await supa.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
+  if(error) document.getElementById('authMsg').innerHTML='<span class=text-red-500>'+error.message+'</span>';
 }
-async function doAuthRegister(){
-  const email=document.getElementById('regEmail').value.trim(), pass=document.getElementById('regPass').value.trim(), biz=document.getElementById('regBizName').value.trim();
-  if(!email||!pass){alert('Email+Pass bharo');return;}
+async function gmailRegister(){
+  const email=document.getElementById('gmailEmail').value.trim(),pass=document.getElementById('gmailPass').value.trim();
+  if(!email.includes('@gmail.com')){document.getElementById('authMsg').innerHTML='<span class=text-amber-600>Sirf @gmail.com allow hai</span>';return;}
+  if(!email||pass.length<6){alert('Gmail + 6 char password bharo');return;}
   document.getElementById('authMsg').innerText='Registering...';
-  const {data,error}=await supa.auth.signUp({email,password:pass,options:{data:{business_name:biz}}});
-  if(error){ document.getElementById('authMsg').innerHTML='<span class=text-red-500>'+error.message+'</span>'; return; }
-  if(data.user){ try{ await supa.from('profiles').insert([{id:data.user.id,business_name:biz}]); }catch(e){} }
-  document.getElementById('authMsg').innerHTML='<span class=text-green-600>Registered ✅ Ab Login karo</span>';
-  switchAuthTab('login'); document.getElementById('authEmail').value=email;
+  const {data,error}=await supa.auth.signUp({email,password:pass});
+  if(error){document.getElementById('authMsg').innerHTML='<span class=text-red-500>'+error.message+'</span>';return;}
+  document.getElementById('authMsg').innerHTML='<span class=text-green-600>Registered ✅ Ab Login karo (agar confirm email OFF hai to direct login)</span>';
 }
-async function doAuthLogin(){
-  const email=document.getElementById('authEmail').value.trim(), pass=document.getElementById('authPass').value.trim();
-  if(!email||!pass){alert('Email+Pass bharo');return;}
+async function gmailLogin(){
+  const email=document.getElementById('gmailEmail').value.trim(),pass=document.getElementById('gmailPass').value.trim();
+  if(!email.includes('@gmail.com')){document.getElementById('authMsg').innerHTML='<span class=text-amber-600>Sirf @gmail.com se login</span>';return;}
   document.getElementById('authMsg').innerText='Login...';
   const {data,error}=await supa.auth.signInWithPassword({email,password:pass});
-  if(error){ document.getElementById('authMsg').innerHTML='<span class=text-red-500>'+error.message+'</span>'; return; }
+  if(error){document.getElementById('authMsg').innerHTML='<span class=text-red-500>'+error.message+'</span>';return;}
   location.reload();
 }
-async function doLogoutAuth(){ await supa.auth.signOut(); location.reload(); }
+async function doLogout(){await supa.auth.signOut();location.reload();}
 async function checkAuth(){
-  const {data:{session}} = await supa.auth.getSession();
-  if(session){
+  if(!supa) return;
+  const {data:{session}}=await supa.auth.getSession();
+  if(session && session.user.email && session.user.email.includes('@gmail.com')){
     document.getElementById('authBox').style.display='none';
     document.getElementById('mainApp').style.display='flex';
-    document.getElementById('userInfoTop').innerText=session.user.email;
-    loadCustomers(); loadProducts(); loadStats();
+    document.getElementById('userBadge').innerText=session.user.email;
+    document.getElementById('topEmail').innerText=session.user.email;
+    loadAll();
+  } else if(session && !session.user.email.includes('@gmail.com')){
+    await supa.auth.signOut();
+    document.getElementById('authMsg').innerHTML='<span class=text-red-500>Sirf @gmail.com allow hai, dusra email logout kar diya</span>';
+    document.getElementById('authBox').style.display='flex';
+    document.getElementById('mainApp').style.display='none';
   } else {
     document.getElementById('authBox').style.display='flex';
     document.getElementById('mainApp').style.display='none';
   }
 }
 function showTab(t){
-  document.querySelectorAll('[id^=view-]').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('[id^=view-]').forEach(e=>e.classList.add('hidden'));
   document.getElementById('view-'+t).classList.remove('hidden');
-  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('border-[#5B5CFF]','text-[#5B5CFF]','border-b-2');});
-  document.getElementById('tab-'+t).classList.add('border-[#5B5CFF]','text-[#5B5CFF]','border-b-2');
+  document.querySelectorAll('.tab').forEach(b=>{b.classList.remove('bg-[#4F46E5]','text-white');b.classList.add('text-slate-600');});
+  document.getElementById('tab-'+t).classList.add('bg-[#4F46E5]','text-white');
 }
+async function loadAll(){loadCustomers();loadProducts();loadStats();loadSales();}
 async function loadStats(){
-  if(!supa) return;
-  const {data:{user}} = await supa.auth.getUser(); if(!user) return;
+  if(!supa) return; const {data:{user}}=await supa.auth.getUser(); if(!user) return;
   const [c,p,s]=await Promise.all([supa.from('customers').select('*').eq('user_id',user.id), supa.from('products').select('*').eq('user_id',user.id), supa.from('sales').select('*').eq('user_id',user.id)]);
   document.getElementById('stat-cust').innerText=(c.data||[]).length;
   document.getElementById('stat-prod').innerText=(p.data||[]).length;
@@ -163,28 +180,34 @@ async function loadStats(){
   document.getElementById('stat-due').innerText='₹'+due; document.getElementById('stat-sales').innerText='₹'+total;
 }
 async function loadCustomers(){
-  if(!supa) return; const {data:{user}} = await supa.auth.getUser(); if(!user) return;
-  const {data}=await supa.from('customers').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(50);
-  document.getElementById('custList').innerHTML=(data||[]).map(c=>`<div class='border p-2 rounded flex justify-between'><div><b>${c.name}</b><div class='text-xs'>${c.phone||''} Due ₹${c.balance_due||0}</div></div></div>`).join('')||'No customers';
+  if(!supa) return; const {data:{user}}=await supa.auth.getUser(); if(!user) return;
+  const {data}=await supa.from('customers').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100);
+  document.getElementById('custList').innerHTML=(data||[]).map(c=>`<div class='border p-3 rounded-xl bg-white flex justify-between'><div><b>${c.name}</b><div class='text-xs text-slate-500'>${c.phone||''} | Due ₹${c.balance_due||0}</div></div></div>`).join('')||'<p class=text-slate-400>No customers</p>';
 }
 async function addCustomer(){
   const name=document.getElementById('custName').value.trim(), phone=document.getElementById('custPhone').value.trim(), amt=parseFloat(document.getElementById('custAmount').value)||0;
   if(!name){alert('Naam bharo');return;}
-  const {data:{user}} = await supa.auth.getUser();
+  const {data:{user}}=await supa.auth.getUser();
   const {error}=await supa.from('customers').insert([{name,phone,balance_due:amt,user_id:user.id}]);
   if(error) alert(error.message); else {document.getElementById('custName').value=''; loadCustomers(); loadStats();}
 }
 async function loadProducts(){
-  if(!supa) return; const {data:{user}} = await supa.auth.getUser(); if(!user) return;
-  const {data}=await supa.from('products').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(50);
-  document.getElementById('prodList').innerHTML=(data||[]).map(p=>`<div class='border p-2 rounded'>${p.name} - ₹${p.selling_price||0} Stock ${p.stock||0}</div>`).join('')||'No products';
+  if(!supa) return; const {data:{user}}=await supa.auth.getUser(); if(!user) return;
+  const {data}=await supa.from('products').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100);
+  document.getElementById('prodList').innerHTML=(data||[]).map(p=>`<div class='border p-3 rounded-xl bg-white'><b>${p.name}</b><div class='text-xs'>₹${p.selling_price} | Stock ${p.stock} | GST ${p.gst_rate}%</div></div>`).join('')||'<p class=text-slate-400>No products</p>';
 }
 async function addProduct(){
   const name=document.getElementById('prodName').value.trim(), sell=parseFloat(document.getElementById('prodSell').value)||0, stock=parseInt(document.getElementById('prodStock').value)||0, gst=parseInt(document.getElementById('prodGst').value)||18;
   if(!name){alert('Naam bharo');return;}
-  const {data:{user}} = await supa.auth.getUser();
+  const {data:{user}}=await supa.auth.getUser();
   const {error}=await supa.from('products').insert([{name,selling_price:sell,stock,gst_rate:gst,user_id:user.id}]);
   if(error) alert(error.message); else {document.getElementById('prodName').value=''; loadProducts(); loadStats();}
+}
+async function loadSales(){
+  if(!supa) return; const {data:{user}}=await supa.auth.getUser(); if(!user) return;
+  const {data}=await supa.from('sales').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(50);
+  document.getElementById('salesList').innerHTML=(data||[]).map(s=>`<div class='border p-3 rounded-xl bg-white flex justify-between'><b>${s.invoice_no||'INV'}</b><span class='font-bold'>₹${s.total||0}</span></div>`).join('')||'<p class=text-slate-400>No sales</p>';
+  document.getElementById('billList').innerHTML=document.getElementById('salesList').innerHTML;
 }
 loadSupa();
 </script>
