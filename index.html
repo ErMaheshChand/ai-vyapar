@@ -15,8 +15,16 @@ async function register(){
 }
 async function login(){
   const {data,error} = await supa.auth.signInWithPassword({email: email.value, password: pass.value})
-  msg.innerText = error ? error.message : 'Login Success ✅'
-  if(!error) location.reload()
+  if(error){ msg.innerText = error.message; return; }
+  
+  // Bina verify ke login roko
+  if(data.user && !data.user.email_confirmed_at){
+    await supa.auth.signOut();
+    msg.innerText = '❌ Pehle Gmail kholo aur verification link pe click karo, tab login hoga';
+    return;
+  }
+  msg.innerText = 'Login Success ✅';
+  location.reload();
 }
 // Session check
 supa.auth.getSession().then(({data})=>{
